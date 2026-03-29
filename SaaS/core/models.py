@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 class Evento(models.Model):
     organizador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='eventos')
@@ -13,9 +14,23 @@ class Evento(models.Model):
     valor_cobrado = models.DecimalField(max_digits=10, decimal_places=2, help_text="Preço vendido ao cliente")
     total_comida_preparada = models.DecimalField(max_digits=10, decimal_places=2, help_text="Em kg ou unidades")
 
+    def calcular_total_gastos(self):
+        # Busca todos os gastos relacionados a este evento e soma o campo 'valor'
+        total = self.gastos.aggregate(Sum('valor'))['valor__sum']
+        return float(total or 0)
+    
     def __str__(self):
         return self.nome 
 
+class Gasto(models.Model):
+    # Relaciona o gasto a um evento. Se o evento for deletado, os gastos somem (CASCADE)
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, related_name='gastos')
+    descricao = models.CharField(max_length=255)
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    data_cadastro = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.descricao} - R$ {self.valor}"
 
 class Convidado(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
