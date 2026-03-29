@@ -1,5 +1,15 @@
-.env
-.venv/
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Django
 db.sqlite3
-*.pyc
+media/
+static/
+
+# IDEs
+.vscode/
+.idea/
